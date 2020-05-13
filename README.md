@@ -13,6 +13,6 @@ Issues:
 																																																																
   -Script speed is system and network dependent, may or may not work on your specific system. [Fixed]
 
-	-No longer platform universal, only linux. 
+  -No longer platform universal, only linux. 
 
   -Mouse wheel and mouse wheel button has not been integrated yet. 
