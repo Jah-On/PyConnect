@@ -9,7 +9,7 @@ Issues:
 																																																																
   -No encrpyption, HIGHLY NOT RECOMMENDED FOR USE OUTSIDE OF LAN.
 																																																															
-  -Remote screen can't be sent to device managing the other device. 
+  -Remote screen can't be sent to device managing the other device. [Fixed]
 																																																																
   -Script speed is system and network dependent, may or may not work on your specific system.
 																																																																
