@@ -11,7 +11,7 @@ Issues:
 																																																															
   -Remote screen can't be sent to device managing the other device. [Fixed]
 																																																																
-  -Script speed is system and network dependent, may or may not work on your specific system. [Fixed]
+  -Script speed is system and network dependent, may or may not work on your specific system. 
 
   -No longer platform universal, only linux. 
 
