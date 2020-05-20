@@ -10,11 +10,12 @@ from io import BytesIO
 pygame.init()
 dsp = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
 pygame.display.set_caption('PyConnect ')
+ip = str(input())
 s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s2.connect(("192.168.2.12", 1235))
+s2.connect((ip, 1235))
 surface = pygame.Surface((255,255))
 server = FTP()
-server.connect('192.168.2.12', 1234)
+server.connect(ip, 1234)
 server.login('user', '12345')
 
 def Input():
