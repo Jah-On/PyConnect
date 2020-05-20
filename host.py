@@ -5,6 +5,7 @@ from pynput import mouse, keyboard
 from pynput.keyboard import Key, Controller
 from pynput.mouse import Button, Controller
 import os
+import sys
 import time
 import pyscreenshot as ImageGrab
 import threading
@@ -14,6 +15,9 @@ from pyftpdlib.servers import FTPServer
 
 os.system("mkdir Temp")
 os.system("sudo mount -t tmpfs -o rw,size=50M tmpfs Temp")
+
+print('Enter IP address or Hostname this device should use.')
+ip = input()
 
 mouse = pynput.mouse.Controller()
 keyboard = pynput.keyboard.Controller()
@@ -36,7 +40,7 @@ handler.authorizer = authorizer
 #handler.passive_ports = range(60000, 65535)
 
 # Instantiate FTP server class and listen on 0.0.0.0:2121
-address = ('192.168.2.12', 1234)
+address = (str(ip), 1234)
 server = FTPServer(address, handler)
 
 # set a limit for connections
@@ -45,20 +49,29 @@ server.max_cons_per_ip = 2
 
 
 s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s2.bind(("192.168.2.12", 1235))
+s2.bind((str(ip), 1235))
 s2.listen(1)
 
 connection2, addr2 = s2.accept()
 
 def Output():
     global online
+    global splited
     online = True
     while online:
         image = ImageGrab.grab()
-        image.save("Temp/image.png")
+        image.save("Temp/image.jpg")
+        teller = '1'
+        connection2.send(teller.encode('utf-8'))
+        time.sleep(.0166)
+        if splited[0] == '1':
+            server.close_all()
+            os.system('sudo umount Temp')
+            break
 
 def Input():
     global online
+    global splited
     while online:
         # Data handlers
         get = connection2.recv(1500)
@@ -66,8 +79,10 @@ def Input():
         splited = get_decoded.split(":", 50)
 
         # Session status checker
-        if splited[0] == "1":
-            online = False
+        if splited[0] == '1':
+            print('Closing input thread')
+            server.close_all()
+            break
 
         # Mouse handlers
         posx = float(splited[1])
@@ -90,7 +105,7 @@ def Input():
         if splited[6] == "1":
             keyboard.press('1')
         else:
-            keyboard.release('0')
+            keyboard.release('1')
         if splited[7] == "1":
             keyboard.type('2')
         if splited[8] == "1":
