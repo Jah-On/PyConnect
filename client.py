@@ -1,37 +1,64 @@
 import pygame
-import socket
 import time
 import sys
-from PIL import Image
+import fs
 import threading
 from ftplib import FTP
+import io
 from io import BytesIO
+from io import StringIO
 
+mem = fs.open_fs('mem://')
 pygame.init()
 dsp = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
 pygame.display.set_caption('PyConnect ')
 ip = str(input())
-s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s2.connect((ip, 1235))
 surface = pygame.Surface((255,255))
 server = FTP()
 server.connect(ip, 1234)
-server.login('user', '12345')
+server.login('', '')
 
 def Input():
     global stayOpen
+    global Img2Gen
     stayOpen = True
+    x = 1
     while stayOpen:
-        image_store=BytesIO()
-        try:
-            server.retrbinary('RETR image.png', image_store.write)
-            readfrombuf = Image.open(image_store)
-            binary_image = readfrombuf.tobytes('raw','RGB')
-            image = pygame.image.frombuffer(binary_image, (1600,900), 'RGB')
+        teller = mem.open('teller.txt', 'rw')
+        image = mem.open('image.jpg', 'rw')
+        server.retrbinary('RETR teller_h.txt', teller.write())
+        tellerData = teller.read()
+        if (tellerData == bytes('1', 'utf8')) & (x == 1):
+            past = time.time()
+            print(time.time() - past)
+            past = time.time()
+            teller.write('0')
+            print(time.time() - past)
+            past = time.time()
+            server.storbinary('STOR teller_h.txt', teller)
+            print(time.time() - past)
+            past = time.time()
+            server.retrbinary('RETR image.jpg', image.write())
+            print(time.time() - past)
+            past = time.time()
+            binary_image = image.read()
+            print(time.time() - past)
+            past = time.time()
+            image = pygame.image.frombuffer(binary_image, (1920,1080), 'RGB')
+            print(time.time() - past)
+            past = time.time()
             dsp.blit(image, (0,0))
+            print(time.time() - past)
+            past = time.time()
             pygame.display.flip()
-        except:
-            time.sleep(.01)
+            print(time.time() - past)
+            past = time.time()
+            recvedTellerStore = BytesIO(b"1")
+            print(time.time() - past)
+            past = time.time()
+            server.storbinary('STOR recvedTeller.txt', recvedTellerStore)
+            print(time.time() - past)
+            x = 0
 
 def Output():
     global stayOpen
@@ -99,15 +126,14 @@ def Output():
             else:
                 kb_9 = "0"
 
-            send = close_session + ":" + mouseposx + ":" + mouseposy + ":" + mousebutton1 + ":" + mousebutton3 + ":" + kb_0 + ":" + kb_1 + ":" + kb_2 + ":" + kb_3 + ":" + kb_4 + ":" + kb_5 + ":" + kb_6 + ":" + kb_7 + ":" + kb_8 + ":" + kb_9
-            s2.send(send.encode("utf-8"))
+            send = close_session + ":" + mouseposx + ":" + mouseposy + ":" + mousebutton1 + ":" + mousebutton3 + ":" + kb_0 + ":" + kb_1 + ":" + kb_2 + ":" + kb_3 + ":" + kb_4 + ":" + kb_5 + ":" + kb_6 + ":" + kb_7 + ":" + kb_8 + ":" + kb_9 + ":" + Img2Gen
 
             if close_session == "1":
                 s2.close()
                 pygame.display.quit()
                 stayOpen = False
 
-            if (pygame.key.get_pressed()[pygame.K_ESCAPE] & pygame.key.get_pressed()[pygame.K_RCTRL] & pygame.key.get_pressed()[pygame.K_RALT]):
+            if (pygame.key.get_pressed()[pygame.K_e] & pygame.key.get_pressed()[pygame.K_RCTRL] & pygame.key.get_pressed()[pygame.K_RALT]):
                 close_session = "1"
 
             if (pygame.key.get_pressed()[pygame.K_LSHIFT] & pygame.key.get_pressed()[pygame.K_RCTRL] & pygame.key.get_pressed()[pygame.K_RALT] & pygame.key.get_pressed()[pygame.K_f]):
