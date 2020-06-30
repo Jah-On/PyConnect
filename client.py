@@ -26,39 +26,19 @@ def Input():
     while stayOpen:
         teller = mem.open('teller.txt', 'rw')
         image = mem.open('image.jpg', 'rw')
+        rcvd = mem.open('rcvd.txt', 'rw')
         server.retrbinary('RETR teller_h.txt', teller.write())
         tellerData = teller.read()
-        if (tellerData == bytes('1', 'utf8')) & (x == 1):
-            past = time.time()
-            print(time.time() - past)
-            past = time.time()
+        if (tellerData == bytes('1', 'utf8')):
             teller.write('0')
-            print(time.time() - past)
-            past = time.time()
             server.storbinary('STOR teller_h.txt', teller)
-            print(time.time() - past)
-            past = time.time()
             server.retrbinary('RETR image.jpg', image.write())
-            print(time.time() - past)
-            past = time.time()
             binary_image = image.read()
-            print(time.time() - past)
-            past = time.time()
             image = pygame.image.frombuffer(binary_image, (1920,1080), 'RGB')
-            print(time.time() - past)
-            past = time.time()
             dsp.blit(image, (0,0))
-            print(time.time() - past)
-            past = time.time()
             pygame.display.flip()
-            print(time.time() - past)
-            past = time.time()
-            recvedTellerStore = BytesIO(b"1")
-            print(time.time() - past)
-            past = time.time()
-            server.storbinary('STOR recvedTeller.txt', recvedTellerStore)
-            print(time.time() - past)
-            x = 0
+            rcvd.write('1')
+            server.storbinary('STOR recvedTeller.txt', rcvd)
 
 def Output():
     global stayOpen
