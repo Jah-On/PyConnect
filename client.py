@@ -1,140 +1,111 @@
-import pygame
-import time
-import sys
-import fs
+from tkinter import *
+from PIL import Image
+from PIL import ImageTk
+import socket
 import threading
-from ftplib import FTP
 import io
-from io import BytesIO
-from io import StringIO
+import time
+import pickle
 
-mem = fs.open_fs('mem://')
-pygame.init()
-dsp = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
-pygame.display.set_caption('PyConnect ')
-ip = str(input())
-surface = pygame.Surface((255,255))
-server = FTP()
-server.connect(ip, 1234)
-server.login('', '')
+s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-def Input():
-    global stayOpen
-    global Img2Gen
-    stayOpen = True
-    x = 1
-    while stayOpen:
-        teller = mem.open('teller.txt', 'rw')
-        image = mem.open('image.jpg', 'rw')
-        rcvd = mem.open('rcvd.txt', 'rw')
-        server.retrbinary('RETR teller_h.txt', teller.write())
-        tellerData = teller.read()
-        if (tellerData == bytes('1', 'utf8')):
-            teller.write('0')
-            server.storbinary('STOR teller_h.txt', teller)
-            server.retrbinary('RETR image.jpg', image.write())
-            binary_image = image.read()
-            image = pygame.image.frombuffer(binary_image, (1920,1080), 'RGB')
-            dsp.blit(image, (0,0))
-            pygame.display.flip()
-            rcvd.write('1')
-            server.storbinary('STOR recvedTeller.txt', rcvd)
+s1.connect(('192.168.0.4', 1234))
+s2.connect(('192.168.0.4', 1235))
 
-def Output():
-    global stayOpen
-    global close_session
-    global dspfullscreen
-    dspfullscreen = 0
-    close_session = "0"
-    while stayOpen:
-        try:
-            time.sleep(.001)
-            # Mouse data control
-            mousepos = pygame.mouse.get_pos()
-            mouseposx = str(mousepos[0])
-            mouseposy = str(mousepos[1])
-            if pygame.mouse.get_pressed()[0]:
-                mousebutton1 = "1"
-            else:
-                mousebutton1 = "0"
+imageBuffer = b''
+state = True
+img = ""
+map = [1,2,3,4,5,6,"Null"]
 
-            if pygame.mouse.get_pressed()[2]:
-                mousebutton3 = "1"
-            else:
-                mousebutton3 = "0"
+def ctlsender():
+    s2.send(pickle.dumps(map))
+    root.after(1, ctlsender)
 
-            # Keyboard data control
-            getkeys = pygame.key.get_pressed()
-            if getkeys[pygame.K_0]:
-                kb_0 = "1"
-            else:
-                kb_0 = "0"
-            if getkeys[pygame.K_1]:
-                kb_1 = "1"
-            else:
-                kb_1 = "0"
-            if getkeys[pygame.K_2]:
-                kb_2 = "1"
-            else:
-                kb_2 = "0"
-            if getkeys[pygame.K_3]:
-                kb_3 = "1"
-            else:
-                kb_3 = "0"
-            if getkeys[pygame.K_4]:
-                kb_4 = "1"
-            else:
-                kb_4 = "0"
-            if getkeys[pygame.K_5]:
-                kb_5 = "1"
-            else:
-                kb_5 = "0"
-            if getkeys[pygame.K_6]:
-                kb_6 = "1"
-            else:
-                kb_6 = "0"
-            if getkeys[pygame.K_7]:
-                kb_7 = "1"
-            else:
-                kb_7 = "0"
-            if getkeys[pygame.K_8]:
-                kb_8 = "1"
-            else:
-                kb_8 = "0"
-            if getkeys[pygame.K_9]:
-                kb_9 = "1"
-            else:
-                kb_9 = "0"
+def mousemove(event):
+    map[0] = event.x
+    map[1] = event.y
 
-            send = close_session + ":" + mouseposx + ":" + mouseposy + ":" + mousebutton1 + ":" + mousebutton3 + ":" + kb_0 + ":" + kb_1 + ":" + kb_2 + ":" + kb_3 + ":" + kb_4 + ":" + kb_5 + ":" + kb_6 + ":" + kb_7 + ":" + kb_8 + ":" + kb_9 + ":" + Img2Gen
+class leftbtn():
+    def down(event):
+        map[2] = 1
 
-            if close_session == "1":
-                s2.close()
-                pygame.display.quit()
-                stayOpen = False
+    def up(event):
+        map[2] = 0
 
-            if (pygame.key.get_pressed()[pygame.K_e] & pygame.key.get_pressed()[pygame.K_RCTRL] & pygame.key.get_pressed()[pygame.K_RALT]):
-                close_session = "1"
+class rightbtn():
+    def down(event):
+        map[3] = 1
 
-            if (pygame.key.get_pressed()[pygame.K_LSHIFT] & pygame.key.get_pressed()[pygame.K_RCTRL] & pygame.key.get_pressed()[pygame.K_RALT] & pygame.key.get_pressed()[pygame.K_f]):
-                if dspfullscreen == 0:
-                    pygame.display.quit()
-                    pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
-                    dspfullscreen = 1
-                    time.sleep(.1)
-                else:
-                    pygame.display.quit()
-                    pygame.display.set_mode((0, 0), pygame.RESIZABLE)
-                    dspfullscreen = 0
-                    time.sleep(.1)
+    def up(event):
+        map[3] = 0
 
-            pygame.event.pump()
+class middlebtn():
+    def down(event):
+        map[4] = 1
 
-        except:
-            pass
+    def up(event):
+        map[4] = 0
 
+class mousewheel():
+    def up(event):
+        map[5] = 1
+        root.after(10)
+        map[5] = 0
 
-input_thread = threading.Thread(target=Input)
-output_thread = threading.Thread(target=Output)
-input_thread.start()
-output_thread.start()
+    def down(event):
+        map[5] = -1
+        root.after(10)
+        map[5] = 0
+
+class keys:
+    def down(event):
+        map[6] = (event.keysym)
+        print(map[6])
+
+    def up(event):
+        map[6] = "Null"
+
+def dummy(event):
+    print(event)
+
+root = Tk()
+lbl = Label(root, image=img)
+lbl.bind("<Motion>", mousemove)
+lbl.bind("<ButtonPress-1>", leftbtn.down)
+lbl.bind("<ButtonRelease-1>", leftbtn.up)
+lbl.bind("<ButtonPress-3>", rightbtn.down)
+lbl.bind("<ButtonRelease-3>", rightbtn.up)
+lbl.bind("<ButtonPress-2>", middlebtn.down)
+lbl.bind("<ButtonRelease-2>", middlebtn.up)
+lbl.bind("<Button-4>", mousewheel.up)
+lbl.bind("<Button-5>", mousewheel.down)
+root.bind("<KeyPress>", keys.down)
+root.bind("<KeyRelease>", keys.up)
+root.after(1, ctlsender)
+lbl.pack(expand="yes")
+
+def reset():
+    global imageBuffer
+    global lbl
+    global img
+    imageLengthRaw = s1.recv(1000000)
+    imageLength = int(imageLengthRaw.decode('utf-8'))
+    if imageLength > 0:
+        # past = time.time()
+        s1.send(b'1')
+        while not (len(imageBuffer) == imageLength):
+            recved = s1.recv(1000000)
+            imageBuffer = imageBuffer + recved
+
+        imageIO = io.BytesIO(imageBuffer)
+        img = ImageTk.PhotoImage(Image.open(imageIO))
+        lbl.configure(image=img)
+        # print(time.time() - past)
+        imageBuffer = b''
+        s1.send(b'2')
+
+    root.after(1, reset)
+
+root.after(1, reset)
+root.mainloop()
