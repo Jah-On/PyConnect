@@ -1,18 +1,11 @@
 # PyConnect
 Python based remote desktop application
 
-This program is no where near complete!
+First release will be on Jan 1st 2020!
 
 Issues:
+  -There are performance issues that need to be fixed (input and Screen wise).
 
-  -Keyboard input is repetitive per click. Single Clicke Button b --> bbb, instead of b.
+  -Keyboard input is repetitive per click. Single Clicke Button b --> bbb, instead of b. (Needs testing)
 																																																																
-  -No encrpyption, HIGHLY NOT RECOMMENDED FOR USE OUTSIDE OF LAN.
-																																																															
-  -Remote screen can't be sent to device managing the other device. [Fixed]
-																																																																
-  -Script speed is system and network dependent, may or may not work on your specific system. 
-
-  -No longer platform universal, only linux. 
-
-  -Mouse wheel and mouse wheel button has not been integrated yet. 
+  -Script speed is system and network dependent, may or may not work on your specific system. (Needs testing)
