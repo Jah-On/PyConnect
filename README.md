@@ -1,7 +1,7 @@
 # PyConnect
 Python based remote desktop application
 
-First release will be on Jan 1st 2020!
+First release will be on Jan 1st 2021!
 
 Issues:
   -There are performance issues that need to be fixed (input and Screen wise).
