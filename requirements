@@ -1,0 +1,10 @@
+python -m pip install pynput
+python -m pip install netifaces
+python -m pip install psutil
+python -m pip install dearpygui
+python -m pip install blosc
+python -m pip install numpy
+python -m pip install opencv-python
+python -m pip install screeninfo
+python -m pip install pycryptodome
+python -m pip install mss
